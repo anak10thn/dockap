@@ -5,7 +5,12 @@ usage="$(basename "$0") [-h] [-r|-x|-i image] [-l]
 $(basename "$0") -- Sandbox manager based on docker for linux GUI application
 
 where:
-    -h  show this help text"
+    -h|--help       Show this help text
+    -i|--install    Install application
+    -x|--exec       Execute your application
+    -e|--export     Export image
+    -b|--build      Build image
+    -l|--list       List all images"
 
 install(){
 	APP="$1"
