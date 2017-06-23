@@ -1,0 +1,82 @@
+#!/bin/bash
+
+usage="$(basename "$0") [-h] [-r|-x|-i image] [-l]
+
+$(basename "$0") -- Sandbox manager based on docker for linux GUI application
+
+where:
+    -h  show this help text"
+
+install(){
+	APP="$1"
+	docker load --input $APP
+}
+
+remove(){
+	APP="$1"
+	docker rmi $APP
+}
+
+export(){
+	APP="$1"
+	docker save $APP > .$APP.tar
+	mv .$APP.tar $APP-$(uname)-$(uname -m).dockapp
+}
+
+run(){
+	APP="$1"
+	docker run -ti --rm -e DISPLAY=$DISPLAY -v $HOME:/home/developer -v /tmp/.X11-unix:/tmp/.X11-unix $APP
+}
+
+build(){
+	APP="$1"
+	SRC="$2"
+	docker build -t $APP $SRC
+	export $APP
+}
+
+list(){
+	docker images
+}
+
+while getopts ':hire:' option
+do
+key="$1"
+
+case $key in
+    -i|--install)
+    install $2
+    shift 
+    ;;
+    -r|-rm|--remove)
+    	echo "Do you want to remove this application?"
+			select yn in "Yes" "No"; do
+			    case $yn in
+			        Yes ) remove $2; break;;
+			        No ) exit;;
+			    esac
+			done
+    shift 
+    ;;
+    -x|--exec)
+    run $2
+    shift
+    ;;
+    -e|--export)
+    backup $2
+    shift
+    ;;
+    -b|--build)
+    build $2 $3
+    shift
+    ;;
+    -l|--list)
+    list
+    shift
+    ;;
+    -h|--help) echo "$usage"
+    exit
+    ;;
+esac
+shift
+done
